@@ -4,8 +4,11 @@ namespace Net_lab_1
 {
     public class Frame
     {
-        private const int ControlSize = 16;
-        private const int ChecksumSize = 16;
+        public const int ControlSize = 16;
+        public const int ChecksumSize = 8;
+
+        public const int MaxDataSizeBits = 64;
+
         public BitArray ControlBits { get; set; }
 
         public BitArray Data { get; set; }
@@ -20,9 +23,7 @@ namespace Net_lab_1
 
         public BitArray Build()
         {
-            // TODO: Calculate checksum here
-            // Checksum = new VerticalOddityChecksumBuilder().Build(Data);
-            Checksum = new BitArray(ChecksumSize);
+            Checksum = Data.ToChecksum();
 
             int frameSize =
                 ControlSize +
@@ -40,8 +41,13 @@ namespace Net_lab_1
 
         public static Frame Parse(BitArray array)
         {
-            Frame frame = new Frame(array.Subsequence(0, ControlSize), array.Subsequence(ControlSize, array.Length - ControlSize - ChecksumSize));
-            frame.Checksum = array.Subsequence(array.Length - ChecksumSize, ChecksumSize);
+            Frame frame = new Frame(
+                array.Subsequence(0, ControlSize),
+                array.Subsequence(ControlSize, array.Length - ControlSize - ChecksumSize)
+            )
+            {
+                Checksum = array.Subsequence(array.Length - ChecksumSize, ChecksumSize)
+            };
             return frame;
         }
     }
